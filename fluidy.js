@@ -8,7 +8,8 @@ window.Fluidy = (function() {
   var element = null;
   var options = {
     width: '100px',
-    columns: 2
+    columns: 2,
+    imageLoaded: false
   };
   
   var setContentStyles = function(el) {
@@ -65,12 +66,7 @@ window.Fluidy = (function() {
     
   };
   
-  function Fluidy(el, params) {
-    element = el;
-    children = element.children;
-    options = params;
-    setContentStyles(element);
-    
+  var applyFluid = function() {    
     var childrenLen = children.length; 
     for (var i = 0; i < childrenLen; i++) {
       var item = children[i]; 
@@ -79,8 +75,37 @@ window.Fluidy = (function() {
       setPosition(item);
       lastEl = item;
     }
+  };
+  
+  function Fluidy(el, params) {
+    element = el;
+    children = element.children;
+    options = params;
+    setContentStyles(element);
+    
+    if (!options.imageLoaded) {
+      applyFluid();
+    } else {
+      var images_loaded = 0;
+      var images = element.querySelectorAll('img');
+      var total_images = images.length;
+      for (var i = 0; i < total_images; i ++) {       
+        images[i].onload = (function(){
+          return function() {
+            images_loaded++;
+            
+            if (images_loaded >= total_images) {
+              applyFluid();
+            }
+            
+          };
+        })();
+      }
+    }
+    
   }
   
   return Fluidy;
   
 })();
+
